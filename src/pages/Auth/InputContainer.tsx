@@ -1,11 +1,11 @@
 import React, { Dispatch, ReactElement, SetStateAction } from "react";
 import styled from "styled-components";
-import { LoginInfo } from "./Login";
+import { LoginInfo } from "./Form";
 
 interface InputContainerProps {
   children: string;
   type: string;
-  setLoginInfo: Dispatch<SetStateAction<LoginInfo>>;
+  setUserInfo: Dispatch<SetStateAction<LoginInfo>>;
 }
 
 interface InputContainerFunction {
@@ -15,14 +15,14 @@ interface InputContainerFunction {
 const InputContainer: InputContainerFunction = ({
   children,
   type,
-  setLoginInfo,
+  setUserInfo,
 }) => {
   function inputHandler(
     event: React.ChangeEvent<HTMLInputElement>,
     type: string
   ): void {
     const value = event.target.value;
-    setLoginInfo((prevInput) => ({ ...prevInput, [type]: value }));
+    setUserInfo((prevInput) => ({ ...prevInput, [type]: value }));
   }
 
   return (
