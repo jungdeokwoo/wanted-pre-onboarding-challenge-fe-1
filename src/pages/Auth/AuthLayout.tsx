@@ -7,9 +7,9 @@ const LoginLayout = () => {
   return (
     <>
       {isLogin ? (
-        <Form isLogin={isLogin} setIsLogin={setIsLogin}></Form>
+        <Form isLogin={isLogin} setIsLogin={setIsLogin} />
       ) : (
-        <Form isLogin={isLogin} setIsLogin={setIsLogin}></Form>
+        <Form isLogin={isLogin} setIsLogin={setIsLogin} />
       )}
     </>
   );
