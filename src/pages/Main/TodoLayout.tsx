@@ -1,44 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Outlet, useParams, useNavigate } from "react-router-dom";
 import { TodoListProp } from "./Main";
-import DetailForm from "./DetailForm";
-import ModifyForm from "./ModifyForm";
+import { requestHeaders } from "../../components/utility/requestHeaders";
+import { fetchapi } from "../../components/utility/fetchapi";
+import { config } from "../../config";
 
 const TodoLayout = () => {
   const [detailInfo, setDetailInfo] = useState<TodoListProp>(
     {} as TodoListProp
   );
-  const [isModify, setIsModify] = useState(false);
   const params = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const requestHeaders: HeadersInit = new Headers();
-    requestHeaders.set("Content-Type", "application/json");
-    requestHeaders.set("Authorization", localStorage.getItem("token") || "");
-
-    fetch(`http://localhost:8080/todos/${params.id}`, {
-      headers: requestHeaders,
-    })
-      .then((res) => (res.ok ? res.json() : alert("통신오류")))
-      .then((res) => setDetailInfo(res.data));
+    (async function () {
+      const response = await fetchapi.get(
+        `${config.Todo}/${params.id}`,
+        requestHeaders
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setDetailInfo(result.data);
+      } else {
+        const result = await response.json();
+        alert(result.details);
+        navigate(-1);
+      }
+    })();
   }, [params]);
 
   return (
     <>
-      {isModify ? (
-        <ModifyForm
-          setIsModify={setIsModify}
-          setDetailInfo={setDetailInfo}
-          isModify={isModify}
-          detailInfo={detailInfo}
-        />
-      ) : (
-        <DetailForm
-          setIsModify={setIsModify}
-          isModify={isModify}
-          detailInfo={detailInfo}
-        />
-      )}
+      <Outlet context={{ detailInfo, setDetailInfo }}></Outlet>
     </>
   );
 };

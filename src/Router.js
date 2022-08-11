@@ -5,6 +5,8 @@ import Main from "./pages/Main/Main";
 import CreateTodo from "./pages/Main/CreateTodo";
 import Blank from "./pages/Main/Blank";
 import TodoLayout from "./pages/Main/TodoLayout";
+import ModifyForm from "./pages/Main/ModifyForm";
+import DetailForm from "./pages/Main/DetailForm";
 
 const Router = () => {
   return (
@@ -13,7 +15,10 @@ const Router = () => {
         <Route path="/login" element={<AuthLayout />} />
         <Route element={<Main />}>
           <Route path="/" element={<Blank />} />
-          <Route path="/detail/:id" element={<TodoLayout />} />
+          <Route element={<TodoLayout />}>
+            <Route path="/detail/:id" element={<DetailForm />} />
+            <Route path="/modify/:id" element={<ModifyForm />} />
+          </Route>
           <Route path="/create" element={<CreateTodo />} />
         </Route>
       </Routes>

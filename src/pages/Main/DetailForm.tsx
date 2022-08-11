@@ -1,34 +1,27 @@
-import React, { Dispatch, ReactElement, SetStateAction } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { ReactElement } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
+import { fetchapi } from "../../components/utility/fetchapi";
+import { requestHeaders } from "../../components/utility/requestHeaders";
+import { config } from "../../config";
 import { TodoListProp } from "./Main";
 
 interface DetailFormFunction {
-  (param: {
-    isModify: boolean;
-    setIsModify: Dispatch<SetStateAction<boolean>>;
-    detailInfo: TodoListProp;
-  }): ReactElement;
+  (): ReactElement;
 }
 
-const DetailForm: DetailFormFunction = ({
-  setIsModify,
-  isModify,
-  detailInfo,
-}) => {
+interface ContextParameter {
+  detailInfo: TodoListProp;
+}
+
+const DetailForm: DetailFormFunction = () => {
   const navigate = useNavigate();
+  const { detailInfo } = useOutletContext<ContextParameter>();
 
-  async function deleteTodo(id: string | undefined) {
-    const requestHeaders: HeadersInit = new Headers();
-    requestHeaders.set("Content-Type", "application/json");
-    requestHeaders.set("Authorization", localStorage.getItem("token") || "");
-
-    const response = await fetch(
-      `http://localhost:8080/todos/${detailInfo.id}`,
-      {
-        method: "DELETE",
-        headers: requestHeaders,
-      }
+  async function deleteTodo(todoItemId: string | undefined) {
+    const response = await fetchapi.delete(
+      `${config.Todo}/${todoItemId}`,
+      requestHeaders
     );
     if (response.ok) {
       navigate("/");
@@ -37,8 +30,8 @@ const DetailForm: DetailFormFunction = ({
     }
   }
 
-  function changeTodo() {
-    setIsModify(!isModify);
+  function goModify(todoItemId: string | undefined) {
+    navigate(`/modify/${todoItemId}`);
   }
 
   return (
@@ -46,7 +39,9 @@ const DetailForm: DetailFormFunction = ({
       <DetailTitle>Title : {detailInfo.title}</DetailTitle>
       <DetailContent>Content : {detailInfo.content}</DetailContent>
       <ButtonWrapper>
-        <ModifyButton onClick={() => changeTodo()}>수정하기</ModifyButton>
+        <ModifyButton onClick={() => goModify(detailInfo.id)}>
+          수정하기
+        </ModifyButton>
         <DeleteButton onClick={() => deleteTodo(detailInfo.id)}>
           삭제하기
         </DeleteButton>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { TodoListProp } from "./Main";
 
-const TodoList = ({ data: { title, id } }: { data: TodoListProp }) => {
+const TodoList = ({ listItem: { title, id } }: { listItem: TodoListProp }) => {
   const navigate = useNavigate();
 
   function goDetail(id: string) {

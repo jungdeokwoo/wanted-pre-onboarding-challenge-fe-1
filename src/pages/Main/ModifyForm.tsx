@@ -4,45 +4,37 @@ import React, {
   ReactElement,
   ChangeEvent,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
+import { fetchapi } from "../../components/utility/fetchapi";
+import { requestHeaders } from "../../components/utility/requestHeaders";
+import { config } from "../../config";
 import { TodoListProp } from "./Main";
 
 interface ModifyFormFunction {
-  (param: {
-    isModify: boolean;
-    setIsModify: Dispatch<SetStateAction<boolean>>;
-    detailInfo: TodoListProp;
-    setDetailInfo: Dispatch<SetStateAction<TodoListProp>>;
-  }): ReactElement;
+  (): ReactElement;
 }
 
-const ModifyForm: ModifyFormFunction = ({
-  isModify,
-  setIsModify,
-  setDetailInfo,
-  detailInfo,
-}) => {
+interface ContextParameter {
+  detailInfo: TodoListProp;
+  setDetailInfo: Dispatch<SetStateAction<TodoListProp>>;
+}
+
+const ModifyForm: ModifyFormFunction = () => {
+  const { detailInfo, setDetailInfo } = useOutletContext<ContextParameter>();
   const navigate = useNavigate();
 
   async function modifyTodo() {
-    const requestHeaders: HeadersInit = new Headers();
-    requestHeaders.set("Content-Type", "application/json");
-    requestHeaders.set("Authorization", localStorage.getItem("token") || "");
-
-    const response = await fetch(
-      `http://localhost:8080/todos/${detailInfo.id}`,
+    const response = await fetchapi.put<{ title: string; content: string }>(
+      `${config.Todo}/${detailInfo.id}`,
       {
-        method: "PUT",
-        headers: requestHeaders,
-        body: JSON.stringify({
-          title: detailInfo.title,
-          content: detailInfo.content,
-        }),
-      }
+        title: detailInfo.title,
+        content: detailInfo.content,
+      },
+      requestHeaders
     );
     if (response.ok) {
-      setIsModify(!isModify);
+      navigate(`/detail/${detailInfo.id}`, { replace: true });
     } else {
       alert("다시 시도해주세요");
     }

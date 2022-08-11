@@ -2,9 +2,11 @@ import React, { useState, useMemo, Dispatch, SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import InputContainer from "./InputContainer";
+import { fetchapi } from "../../components/utility/fetchapi";
+import { config } from "../../config";
 
 export interface LoginInfo {
-  id: string;
+  email: string;
   password: string;
 }
 
@@ -17,39 +19,33 @@ const Form = ({
 }) => {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<LoginInfo>({
-    id: "",
+    email: "",
     password: "",
   });
 
   const isInputValid: boolean = useMemo(
     () =>
-      userInfo.id.includes("@") &&
-      userInfo.id.includes(".") &&
+      userInfo.email.includes("@") &&
+      userInfo.email.includes(".") &&
       userInfo.password.length >= 8,
-    [userInfo.id, userInfo.password]
+    [userInfo.email, userInfo.password]
   );
 
   const url: string = useMemo(
-    () =>
-      isLogin
-        ? "http://localhost:8080/users/login"
-        : "http://localhost:8080/users/create",
+    () => (isLogin ? `${config.Auth}/login` : `${config.Auth}/create`),
     [isLogin]
   );
 
   async function onSubmit() {
+    const requestHeaders: HeadersInit = new Headers();
+    requestHeaders.set("Content-Type", "application/json");
+    requestHeaders.set("Authorization", localStorage.getItem("token") || "");
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: userInfo.id,
-          password: userInfo.password,
-        }),
-      });
-      console.log(response);
+      const response = await fetchapi.post<{ email: string; password: string }>(
+        url,
+        userInfo,
+        requestHeaders
+      );
       if (response.ok) {
         const result = await response.json();
         localStorage.setItem("token", result.token);
@@ -68,12 +64,14 @@ const Form = ({
     setIsLogin(!isLogin);
   }
 
+  console.log(userInfo);
+
   return (
     <LoginPage>
       <LoginContainer>
         <Title>{isLogin ? "로그인" : "회원가입"}</Title>
         <InputSection>
-          <InputContainer setUserInfo={setUserInfo} type="id">
+          <InputContainer setUserInfo={setUserInfo} type="email">
             아이디
           </InputContainer>
           <InputContainer setUserInfo={setUserInfo} type="password">
