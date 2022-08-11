@@ -1,48 +1,47 @@
 import React, { ChangeEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { fetchapi } from "../../components/utility/fetchapi";
+import { requestHeaders } from "../../components/utility/requestHeaders";
+import { config } from "../../config";
 
 const CreateTodo = () => {
   const [inputData, setInputData] = useState({ title: "", content: "" });
   const navigate = useNavigate();
 
-  function titleHandler({ target }: ChangeEvent<HTMLInputElement>) {
+  function titleInputHandler({ target }: ChangeEvent<HTMLInputElement>) {
     setInputData((prev) => ({ ...prev, title: target.value }));
   }
 
-  function contentHandler({ target }: ChangeEvent<HTMLTextAreaElement>) {
+  function contentInputHandler({ target }: ChangeEvent<HTMLTextAreaElement>) {
     setInputData((prev) => ({ ...prev, content: target.value }));
   }
 
   async function submitTodo() {
     try {
-      const requestHeaders: HeadersInit = new Headers();
-      requestHeaders.set("Content-Type", "application/json");
-      requestHeaders.set("Authorization", localStorage.getItem("token") || "");
-
-      const response = await fetch("http://localhost:8080/todos", {
-        method: "POST",
-        headers: requestHeaders,
-        body: JSON.stringify(inputData),
-      });
+      const response = await fetchapi.post(
+        `${config.Todo}`,
+        inputData,
+        requestHeaders
+      );
       if (response.ok) {
         navigate("/");
       } else {
         alert("통신에러 다시시도해주세요");
       }
     } catch (e) {
-      alert("다시시도해주세요");
+      alert("다시 시도해주세요");
     }
   }
 
   return (
     <CreatePage>
       <TitleInput
-        onChange={(event) => titleHandler(event)}
+        onChange={(event) => titleInputHandler(event)}
         placeholder="제목"
       />
       <ContentInput
-        onChange={(event) => contentHandler(event)}
+        onChange={(event) => contentInputHandler(event)}
         placeholder="내용"
       />
       <SubmitButton onClick={submitTodo}>생성하기</SubmitButton>
