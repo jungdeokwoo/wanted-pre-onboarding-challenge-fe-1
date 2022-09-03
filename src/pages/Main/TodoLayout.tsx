@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useParams, useNavigate } from "react-router-dom";
-import { TodoListProp } from "./Main";
 import { requestHeaders } from "../../components/utility/requestHeaders";
 import { fetchapi } from "../../components/utility/fetchapi";
 import { config } from "../../config";
 
 const TodoLayout = () => {
-  const [detailInfo, setDetailInfo] = useState<TodoListProp>(
-    {} as TodoListProp
-  );
+  const [detailInfo, setDetailInfo] = useState({ content: "", title: "" });
   const params = useParams();
   const navigate = useNavigate();
 

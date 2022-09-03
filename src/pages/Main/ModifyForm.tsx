@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import React, {
   Dispatch,
   SetStateAction,
@@ -18,11 +19,28 @@ interface ModifyFormFunction {
 interface ContextParameter {
   detailInfo: TodoListProp;
   setDetailInfo: Dispatch<SetStateAction<TodoListProp>>;
+  refetch: string;
 }
 
 const ModifyForm: ModifyFormFunction = () => {
   const { detailInfo, setDetailInfo } = useOutletContext<ContextParameter>();
   const navigate = useNavigate();
+
+  const { data, refetch } = useQuery(
+    ["todos"],
+    async () => {
+      const res = await fetchapi.get(`${config.Todo}`, requestHeaders);
+      return await res.json();
+    },
+    {
+      enabled: false,
+      select: (data) => {
+        const result = data.data;
+        return result;
+      },
+      refetchOnWindowFocus: false,
+    }
+  );
 
   async function modifyTodo() {
     const response = await fetchapi.put<{ title: string; content: string }>(
@@ -34,6 +52,7 @@ const ModifyForm: ModifyFormFunction = () => {
       requestHeaders
     );
     if (response.ok) {
+      refetch();
       navigate(`/detail/${detailInfo.id}`, { replace: true });
     } else {
       alert("다시 시도해주세요");
@@ -44,18 +63,24 @@ const ModifyForm: ModifyFormFunction = () => {
     navigate("/");
   }
 
-  function titleHandler({ target }: ChangeEvent<HTMLInputElement>) {
-    setDetailInfo((prev) => ({ ...prev, title: target.value }));
+  function titleHandler(event: ChangeEvent<HTMLInputElement>) {
+    setDetailInfo((prev) => ({ ...prev, title: event.target.value }));
   }
 
-  function contentHandler({ target }: ChangeEvent<HTMLTextAreaElement>) {
-    setDetailInfo((prev) => ({ ...prev, content: target.value }));
+  function contentHandler(event: ChangeEvent<HTMLTextAreaElement>) {
+    setDetailInfo((prev) => ({ ...prev, content: event.target.value }));
   }
 
   return (
     <ModifyWrapper>
-      <ModifyTitle onChange={titleHandler} value={detailInfo.title} />
-      <ModifyContent onChange={contentHandler} value={detailInfo.content} />
+      <ModifyTitle
+        onChange={(event) => titleHandler(event)}
+        value={detailInfo.title}
+      />
+      <ModifyContent
+        onChange={(event) => contentHandler(event)}
+        value={detailInfo.content}
+      />
       <ButtonWrapper>
         <ModifyButton onClick={() => modifyTodo()}>수정하기</ModifyButton>
         <GoBackButton onClick={() => goBack()}>뒤로가기</GoBackButton>

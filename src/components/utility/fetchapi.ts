@@ -3,15 +3,11 @@
 // requestHeaders.set("Authorization", localStorage.getItem("token") || "");
 
 export const fetchapi = {
-  get: async (url: string, requestHeaders: HeadersInit): Promise<Response> => {
+  get: async (url: string, requestHeaders: HeadersInit) => {
     const result = await fetch(url, { headers: requestHeaders });
     return result;
   },
-  post: async <T>(
-    url: string,
-    parameter: T,
-    requestHeaders: HeadersInit
-  ): Promise<Response> => {
+  post: async <T>(url: string, parameter: T, requestHeaders: HeadersInit) => {
     const result = fetch(url, {
       method: "POST",
       headers: requestHeaders,
@@ -19,18 +15,11 @@ export const fetchapi = {
     });
     return result;
   },
-  delete: async (
-    url: string,
-    requestHeaders: HeadersInit
-  ): Promise<Response> => {
+  delete: async (url: string, requestHeaders: HeadersInit) => {
     const result = fetch(url, { method: "DELETE", headers: requestHeaders });
     return result;
   },
-  put: async <T>(
-    url: string,
-    parameter: T,
-    requestHeaders: HeadersInit
-  ): Promise<Response> => {
+  put: async <T>(url: string, parameter: T, requestHeaders: HeadersInit) => {
     const result = fetch(url, {
       method: "PUT",
       headers: requestHeaders,
@@ -38,11 +27,7 @@ export const fetchapi = {
     });
     return result;
   },
-  create: async <T>(
-    url: string,
-    parameter: T,
-    requestHeaders: HeadersInit
-  ): Promise<Response> => {
+  create: async <T>(url: string, parameter: T, requestHeaders: HeadersInit) => {
     const result = fetch(url, {
       method: "",
       headers: requestHeaders,
