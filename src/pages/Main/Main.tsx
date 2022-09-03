@@ -6,11 +6,11 @@ import {
   useLocation,
   Link,
 } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import styled from "styled-components";
 import TodoList from "./TodoList";
 import { fetchapi } from "../../components/utility/fetchapi";
 import { config } from "../../config";
-import { requestHeaders } from "../../components/utility/requestHeaders";
 
 export interface TodoListProp {
   title: string;
@@ -29,23 +29,41 @@ const Main: MainFunction = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      (async function () {
-        try {
-          const response = await fetchapi.get(`${config.Todo}`, requestHeaders);
-          if (response.ok) {
-            const result = await response.json();
-            setTodoList(result.data);
-          } else {
-            alert("다시 접속해 주세요");
-          }
-        } catch (error) {
-          alert("통신에러입니다 다시 시도해주세요");
-        }
-      })();
+  const requestHeaders: HeadersInit = new Headers();
+  requestHeaders.set("Content-Type", "application/json");
+  requestHeaders.set("Authorization", localStorage.getItem("token") || "");
+
+  const { data, isLoading, isError, refetch } = useQuery(
+    ["todos"],
+    async () => {
+      const res = await fetchapi.get(`${config.Todo}`, requestHeaders);
+      return await res.json();
+    },
+    {
+      select: (data) => {
+        const result = data.data;
+        return result;
+      },
+      refetchOnWindowFocus: false,
     }
-  }, [location.pathname.split("/")[1]]);
+  );
+  // useEffect(() => {
+  //   if (localStorage.getItem("token")) {
+  //     (async function () {
+  //       try {
+  //         const response = await fetchapi.get(`${config.Todo}`, requestHeaders);
+  //         if (response.ok) {
+  //           const result = await response.json();
+  //           setTodoList(result.data);
+  //         } else {
+  //           alert("다시 접속해 주세요");
+  //         }
+  //       } catch (error) {
+  //         alert("통신에러입니다 다시 시도해주세요");
+  //       }
+  //     })();
+  //   }
+  // }, [location.pathname.split("/")[1]]);
 
   function goCreate() {
     navigate("/create");
@@ -61,15 +79,12 @@ const Main: MainFunction = () => {
       </TodoMenu>
       <TodoListWrapper>
         <TodoLists>
-          {todoList.length !== 0 &&
-            todoList.map((listItem) => {
-              return (
-                <TodoList listItem={listItem} key={listItem.id}></TodoList>
-              );
-            })}
+          {data?.map((listItem: TodoListProp) => {
+            return <TodoList listItem={listItem} key={listItem.id}></TodoList>;
+          })}
         </TodoLists>
         <TodoDetail>
-          <Outlet />
+          <Outlet context={refetch} />
         </TodoDetail>
       </TodoListWrapper>
     </TodoMain>
